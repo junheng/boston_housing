@@ -13857,11 +13857,13 @@ FCU+EREJlP8Hz4HLCrvq2HYAAAAASUVORK5CYII=
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <h3 id="&#38382;&#39064;-8---&#22238;&#31572;&#65306;">&#38382;&#39064; 8 - &#22238;&#31572;&#65306;<a class="anchor-link" href="#&#38382;&#39064;-8---&#22238;&#31572;&#65306;">&#194;&#182;</a></h3><ul>
-<li>K-fold是指将整体样本分为k份, 每次训练使用1份作为测试集 k-1份作为训练集</li>
-<li>网格搜索每次训练使用1份作为测试集 k-1份作为训练集, 对每个grid的所有类型的参数组合都进行验证</li>
-<li>cv<em>results</em> 以dataframe方式给出所有参数组合的性能, 包括模型性能, 和训练性能</li>
-<li>网格搜索如果不使用交叉验证, 会导致参数搜索结果实际上是对测试集的拟合, 实际泛化效果不如预期, 使用交叉验证集之后使用k次训练均值进行评估, 比较不容易出现这个问题.</li>
+<li>K-fold是指将训练数据分为k份, 每次训练使用1份作为验证集 k-1份作为训练集</li>
+<li>网格搜索每次训练使用1份作为验证集 k-1份作为训练集, 对每个grid的所有类型的参数组合都进行验证</li>
+<li>cv<em>results</em> 以dataframe方式给出所有参数组合的性能, 包括模型性能, 和训练性能, 在结果中, mean_test<em>score字段代表平均分数, 我们可以基于顺序得知最优的结果属于哪一组, 使用这个编号, param</em>* 系列的参数中找到对应的最优参数.</li>
+<li>在网格搜索中, 如果有M组参数, 需要进行M*K次训练和验证</li>
+<li>网格搜索如果仅仅进行一次训练和验证, 无法最大程度避免因训练数据局限性造成的模型得分波动, K次训练取均值可以解决这个问题</li>
 </ul>
+<p>另外之前提到的训练集拟合, 可能没有太理解到题目意思, 我是假设如果仅仅用训练-测试机分割, 然后基于这两部分数据去做网格搜索, 实际上算法就变成了寻找针对测试集的最优参数</p>
 
 </div>
 </div>
@@ -13887,7 +13889,7 @@ FCU+EREJlP8Hz4HLCrvq2HYAAAAASUVORK5CYII=
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[10]:</div>
+<div class="prompt input_prompt">In&nbsp;[29]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span></span><span class="c1"># TODO 4</span>
@@ -13906,7 +13908,7 @@ FCU+EREJlP8Hz4HLCrvq2HYAAAAASUVORK5CYII=
     
     <span class="n">regressor</span> <span class="o">=</span> <span class="n">DecisionTreeRegressor</span><span class="p">()</span>
 
-    <span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;max_depth&quot;</span><span class="p">:[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">10</span><span class="p">]}</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;max_depth&quot;</span><span class="p">:</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">10</span><span class="p">)}</span>
 
     <span class="n">scoring_fnc</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span><span class="n">performance_metric</span><span class="p">)</span>
 
@@ -13941,7 +13943,7 @@ FCU+EREJlP8Hz4HLCrvq2HYAAAAASUVORK5CYII=
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[11]:</div>
+<div class="prompt input_prompt">In&nbsp;[32]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span></span><span class="c1"># TODO 4 可选</span>
@@ -14009,13 +14011,13 @@ FCU+EREJlP8Hz4HLCrvq2HYAAAAASUVORK5CYII=
 <pre>depth: 1 [0.46684278530469969, 0.36303740464269019, 0.34088908204850765]
 depth: 2 [0.75326219263419636, 0.68867021533041761, 0.57796532927838495]
 depth: 3 [0.82380421257253322, 0.80151694499258064, 0.69023198112065087]
-depth: 4 [0.85935182386078413, 0.81350407472852071, 0.73093750097049204]
-depth: 5 [0.86220226543482015, 0.81094430788176175, 0.67488560771457418]
-depth: 6 [0.8427997739777715, 0.792193461190287, 0.68749034642293927]
-depth: 7 [0.83380270395696232, 0.78545077974146882, 0.64398554627590832]
-depth: 8 [0.81393911909965699, 0.74643156489319096, 0.61866789853569026]
-depth: 9 [0.81421789104295605, 0.74979954396182957, 0.61335478543841959]
-depth: 10 [0.82339991323457384, 0.74649853311973935, 0.5865983707436756]
+depth: 4 [0.85342540063746641, 0.81350407472852071, 0.74039115697927671]
+depth: 5 [0.85501985719893681, 0.81094430788176175, 0.67488560771457418]
+depth: 6 [0.83788221093331683, 0.788767009082179, 0.68551010116080835]
+depth: 7 [0.83238489235726976, 0.78658471866981639, 0.65469799455531752]
+depth: 8 [0.81451767339372327, 0.75454582442788487, 0.61259992736446423]
+depth: 9 [0.80714024576944421, 0.73857523853054918, 0.6040852378312549]
+depth: 10 [0.80972220133165695, 0.74412405096045531, 0.60300825462115648]
 Parameter &#39;max_depth&#39; is 4 for the optimal model.
 </pre>
 </div>
@@ -14037,7 +14039,7 @@ Parameter &#39;max_depth&#39; is 4 for the optimal model.
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[12]:</div>
+<div class="prompt input_prompt">In&nbsp;[33]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span></span><span class="c1"># 基于训练数据，获得最优模型</span>
